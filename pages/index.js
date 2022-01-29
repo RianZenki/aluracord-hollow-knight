@@ -36,7 +36,7 @@ export default function PaginaInicial() {
     
     const [username, setUsername] = React.useState('peas')
     const roteamento = useRouter()
-    const [aux, setAux] = React.useState('')
+    const [aux, setAux] = React.useState('peas')
     
 
     return (
@@ -44,8 +44,8 @@ export default function PaginaInicial() {
             <Box
                 styleSheet={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: appConfig.theme.colors.primary[100],
-                    backgroundImage: 'url(https://wallpapercave.com/wp/wp4265350.jpg)',
+                    backgroundColor: appConfig.theme.colors.primary[200],
+                    backgroundImage: appConfig.backgroundImage,
                     backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
                     backgroundPosition: '50%'
                 }}
