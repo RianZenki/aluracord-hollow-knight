@@ -34,9 +34,9 @@ function Title(props) {
 
 export default function PaginaInicial() {
     
-    const [username, setUsername] = React.useState('peas')
+    const [username, setUsername] = React.useState('')
     const roteamento = useRouter()
-    const [aux, setAux] = React.useState('peas')
+    const [aux, setAux] = React.useState('')
     
 
     return (
@@ -70,7 +70,7 @@ export default function PaginaInicial() {
                         as="form"
                         onSubmit={function(event) {
                             event.preventDefault()
-                            roteamento.push('/chat')
+                            roteamento.push(`/chat?username=${username}`)
                         }}
                         styleSheet={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',

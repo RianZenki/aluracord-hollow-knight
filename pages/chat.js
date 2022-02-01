@@ -1,15 +1,29 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
+import { useRouter } from 'next/router'
 import { createClient } from '@supabase/supabase-js'
+import { ButtonSendSticker } from '../src/components/ButtonSendSticker'
 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzU5MDYwMiwiZXhwIjoxOTU5MTY2NjAyfQ.-PIgeNoUGETDfaHDYYcgPuSrt3-8GnZ4X_BmeogYIEM"
 const SUPABASE_URL = "https://xvdjoxfopvxzyjcxqngn.supabase.co"
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 export default function ChatPage() {
+    const roteamento = useRouter()
+    const usuarioLogado = roteamento.query.username
     const [mensagem, setMensagem] = React.useState('')
     const [listaDeMensagens, setListaDeMensagens] = React.useState([])
+
+    function escutaMensagemEmTempoReal(adicionaMensagem) {
+        return supabaseClient
+                    .from('mensagens')
+                    .on('INSERT', (respostaLive) => {
+                        adicionaMensagem(respostaLive.new)
+                    })
+                    .subscribe()
+
+    }
 
     // O hook useEffect(), ou o efeito colateral é utilizado quando alguma coisa foge do fluxo principal
     React.useEffect(() => {
@@ -18,14 +32,19 @@ export default function ChatPage() {
             .select('*')
             .order('id', { ascending: false })
             .then(({ data }) => {
-                console.log('Dados da consulta', data)
                 setListaDeMensagens(data)
             })
+
+        escutaMensagemEmTempoReal((novaMensagem) => {
+            setListaDeMensagens((valorAtualDaLista) => {
+                return [novaMensagem, ...valorAtualDaLista]
+            })
+        })
     }, [])
 
     function handleNovaMensagem(novaMensagem) {
         const mensagem = {
-            de: 'omariosouto',
+            de: usuarioLogado,
             texto: novaMensagem
         }
 
@@ -35,8 +54,8 @@ export default function ChatPage() {
                 mensagem
             ])
             .then(({ data }) => {
-                console.log('Criando mensagem: ', data)
-                setListaDeMensagens([data[0], ...listaDeMensagens])
+                // console.log('Criando mensagem: ', data)
+                // setListaDeMensagens([data[0], ...listaDeMensagens])
             })
             
         setMensagem('')
@@ -114,6 +133,10 @@ export default function ChatPage() {
                                 color: appConfig.theme.colors.neutrals[200],
                             }}
                         />
+                        <ButtonSendSticker onStickerClick={(sticker) => {
+                            console.log('Salva esse sticker no banco', sticker)
+                            handleNovaMensagem(':sticker:' + sticker)
+                        }} />
                     </Box>
                 </Box>
             </Box>
@@ -198,7 +221,16 @@ function MessageList(props) {
                                 {(new Date().toLocaleDateString())}
                             </Text>
                         </Box>
-                        {mensagem.texto}
+
+                        {/* Condicional no react */}
+                        {mensagem.texto.startsWith(':sticker:')
+                            ? (
+                                <Image src={mensagem.texto.replace(':sticker:', '')} />
+                            )
+                            : (
+                                mensagem.texto
+                            )
+                        }
                     </Text>
                 )
             })}
